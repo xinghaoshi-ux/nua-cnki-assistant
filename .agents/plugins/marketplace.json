@@ -1,0 +1,20 @@
+{
+  "name": "nua-cnki-assistant",
+  "interface": {
+    "displayName": "NUA知网小助手"
+  },
+  "plugins": [
+    {
+      "name": "cnki-research",
+      "source": {
+        "source": "local",
+        "path": "./plugins/cnki-research"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Research"
+    }
+  ]
+}

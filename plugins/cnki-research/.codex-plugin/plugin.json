@@ -1,0 +1,35 @@
+{
+  "name": "cnki-research",
+  "version": "0.1.0+codex.20260703181536",
+  "description": "Search, read, download, and critically summarize CNKI literature through an institution-authenticated Chrome session.",
+  "author": {
+    "name": "Estel Xinghao Shi"
+  },
+  "license": "MIT",
+  "keywords": [
+    "CNKI",
+    "\u77e5\u7f51",
+    "academic-research",
+    "literature-review",
+    "Playwright"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "NUA\u77e5\u7f51\u5c0f\u52a9\u624b",
+    "shortDescription": "Search and read CNKI with Playwright.",
+    "longDescription": "Controls a dedicated visible Chrome instance launched in the macOS background, allows multiple Playwright tabs without foreground activation, searches CNKI via the Nanjing University of the Arts proxy, extracts literature metadata, downloads accessible papers, reads CNKI AI full text, and produces structured critical summaries.",
+    "developerName": "Estel Xinghao Shi",
+    "category": "Research",
+    "capabilities": [
+      "Interactive",
+      "Read",
+      "Download"
+    ],
+    "defaultPrompt": [
+      "\u5728\u77e5\u7f51\u641c\u7d22\u76f8\u5173\u8bba\u6587\u5e76\u6574\u7406\u7ed3\u679c\u3002",
+      "\u9605\u8bfb\u5168\u6587\u5e76\u8f93\u51fa\u7ed3\u6784\u5316\u603b\u7ed3\u3002",
+      "\u4e0b\u8f7d\u8fd9\u7bc7\u77e5\u7f51\u8bba\u6587\u7684 PDF\u3002"
+    ]
+  },
+  "mcpServers": "./.mcp.json"
+}

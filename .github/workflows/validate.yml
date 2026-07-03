@@ -1,0 +1,21 @@
+name: Validate plugin
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Validate repository
+        run: python3 scripts/validate.py
+      - name: Check metadata helper CLI
+        run: python3 plugins/cnki-research/skills/cnki-research/scripts/scholar_metadata.py --help

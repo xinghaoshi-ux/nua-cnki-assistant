@@ -1,0 +1,14 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.zip
+
+# Never commit local browser profiles or authentication state.
+browser-profiles/
+user-data-dir/
+cookies*.json
+storage-state*.json

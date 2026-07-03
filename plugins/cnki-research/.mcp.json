@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "cnki-playwright": {
+      "command": "/bin/zsh",
+      "args": [
+        "-lc",
+        "set -euo pipefail\nport=\"${CNKI_CHROME_DEBUG_PORT:-9337}\"\nendpoint=\"http://127.0.0.1:${port}\"\nprofile=\"${CNKI_CHROME_PROFILE:-${HOME}/.codex/browser-profiles/cnki-research}\"\nchrome=\"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\"\nif [[ \"$(uname -s)\" != \"Darwin\" || ! -x \"${chrome}\" ]]; then\n  exec npx -y @playwright/mcp@0.0.77 --extension\nfi\nif ! curl -fsS \"${endpoint}/json/version\" >/dev/null 2>&1; then\n  mkdir -p \"${profile}\"\n  open -g -na \"Google Chrome\" --args --remote-debugging-address=127.0.0.1 --remote-debugging-port=\"${port}\" --user-data-dir=\"${profile}\" --no-first-run --no-default-browser-check about:blank\n  for _ in {1..100}; do\n    if curl -fsS \"${endpoint}/json/version\" >/dev/null 2>&1; then break; fi\n    sleep 0.1\n  done\nfi\nif ! curl -fsS \"${endpoint}/json/version\" >/dev/null 2>&1; then\n  print -u2 \"NUA CNKI Assistant could not start background Chrome on ${endpoint}\"\n  exit 1\nfi\nexec npx -y @playwright/mcp@0.0.77 --endpoint \"${endpoint}\""
+      ]
+    }
+  }
+}
