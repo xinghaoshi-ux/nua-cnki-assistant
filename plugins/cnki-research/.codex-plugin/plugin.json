@@ -1,10 +1,13 @@
 {
   "name": "cnki-research",
-  "version": "0.1.0+codex.20260703181536",
+  "version": "0.1.0+codex.20260703183337",
   "description": "Search, read, download, and critically summarize CNKI literature through an institution-authenticated Chrome session.",
   "author": {
-    "name": "Estel Xinghao Shi"
+    "name": "Estel Xinghao Shi",
+    "url": "https://github.com/xinghaoshi-ux"
   },
+  "homepage": "https://github.com/xinghaoshi-ux/nua-cnki-assistant#readme",
+  "repository": "https://github.com/xinghaoshi-ux/nua-cnki-assistant",
   "license": "MIT",
   "keywords": [
     "CNKI",

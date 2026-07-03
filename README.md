@@ -35,8 +35,7 @@ Windows 和 Linux 会回退到 Playwright MCP 的扩展模式，可以使用主�
 仓库发布到 GitHub 后，其他用户不需要手动复制 Skill 文件，也不需要把仓库克隆到固定目录。最简单的方式是执行两条命令：
 
 ```bash
-export GITHUB_OWNER="你的 GitHub 用户名"
-codex plugin marketplace add "${GITHUB_OWNER}/nua-cnki-assistant"
+codex plugin marketplace add xinghaoshi-ux/nua-cnki-assistant
 codex plugin add cnki-research@nua-cnki-assistant
 ```
 
@@ -45,7 +44,7 @@ codex plugin add cnki-research@nua-cnki-assistant
 也可以使用完整 Git 地址：
 
 ```bash
-codex plugin marketplace add https://github.com/你的用户名/nua-cnki-assistant.git
+codex plugin marketplace add https://github.com/xinghaoshi-ux/nua-cnki-assistant.git
 codex plugin add cnki-research@nua-cnki-assistant
 ```
 
@@ -54,7 +53,7 @@ codex plugin add cnki-research@nua-cnki-assistant
 适合开发、测试或尚未发布到 GitHub 的情况：
 
 ```bash
-git clone https://github.com/你的用户名/nua-cnki-assistant.git
+git clone https://github.com/xinghaoshi-ux/nua-cnki-assistant.git
 codex plugin marketplace add /绝对路径/nua-cnki-assistant
 codex plugin add cnki-research@nua-cnki-assistant
 ```
@@ -270,7 +269,7 @@ git init
 git add .
 git commit -m "Initial release of NUA CNKI Assistant"
 git branch -M main
-git remote add origin git@github.com:你的用户名/nua-cnki-assistant.git
+git remote add origin git@github.com:xinghaoshi-ux/nua-cnki-assistant.git
 git push -u origin main
 ```
 
@@ -280,7 +279,7 @@ git push -u origin main
 gh repo create nua-cnki-assistant --public --source=. --remote=origin --push
 ```
 
-发布后，把本文安装示例中的“你的 GitHub 用户名”替换为真实用户名。建议在 GitHub Releases 中按插件版本创建发行版，方便用户追踪更新。
+建议在 GitHub Releases 中按插件版本创建发行版，方便用户追踪更新。
 
 ## 贡献
 
