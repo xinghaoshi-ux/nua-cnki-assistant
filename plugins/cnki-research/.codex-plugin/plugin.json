@@ -1,7 +1,7 @@
 {
   "name": "cnki-research",
-  "version": "0.1.0+codex.20260703183337",
-  "description": "Search, read, download, and critically summarize CNKI literature through an institution-authenticated Chrome session.",
+  "version": "0.2.0+codex.20260705150722",
+  "description": "Cross-platform CNKI search, reading, download, and research synthesis for Codex and Claude.",
   "author": {
     "name": "Estel Xinghao Shi",
     "url": "https://github.com/xinghaoshi-ux"
@@ -19,8 +19,8 @@
   "skills": "./skills/",
   "interface": {
     "displayName": "NUA\u77e5\u7f51\u5c0f\u52a9\u624b",
-    "shortDescription": "Search and read CNKI with Playwright.",
-    "longDescription": "Controls a dedicated visible Chrome instance launched in the macOS background, allows multiple Playwright tabs without foreground activation, searches CNKI via the Nanjing University of the Arts proxy, extracts literature metadata, downloads accessible papers, reads CNKI AI full text, and produces structured critical summaries.",
+    "shortDescription": "Cross-platform CNKI research for Codex and Claude.",
+    "longDescription": "Controls a dedicated Google Chrome profile on macOS, Windows, and Linux, searches CNKI through the Nanjing University of the Arts proxy, extracts literature metadata, downloads accessible papers, reads CNKI AI full text, and produces structured critical summaries in Codex or Claude Code.",
     "developerName": "Estel Xinghao Shi",
     "category": "Research",
     "capabilities": [

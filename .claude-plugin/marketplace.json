@@ -1,0 +1,23 @@
+{
+  "name": "nua-cnki-assistant",
+  "owner": {
+    "name": "Estel Xinghao Shi"
+  },
+  "metadata": {
+    "description": "Cross-platform CNKI research tools for Claude Code."
+  },
+  "plugins": [
+    {
+      "name": "cnki-research",
+      "source": "./plugins/cnki-research",
+      "description": "Search, read, download, and synthesize CNKI literature through an institution-authenticated Chrome session.",
+      "category": "research",
+      "tags": [
+        "CNKI",
+        "academic-research",
+        "literature-review",
+        "Playwright"
+      ]
+    }
+  ]
+}

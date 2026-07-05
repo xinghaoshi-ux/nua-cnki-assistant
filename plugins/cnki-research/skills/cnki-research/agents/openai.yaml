@@ -1,4 +1,4 @@
 interface:
   display_name: "NUA知网小助手"
   short_description: "Search CNKI, read papers, and summarize evidence"
-  default_prompt: "Use $cnki-research with Playwright controlling the plugin-managed visible background Chrome, allow multiple tabs without foreground activation, monitor user-controlled access steps, read accessible full text, produce a structured critical summary, and generate citations."
+  default_prompt: "Use $cnki-research with the plugin-managed cross-platform Playwright Chrome session, allow multiple tabs without foreground activation, monitor user-controlled access steps, read accessible full text, produce a structured critical summary, and generate citations."

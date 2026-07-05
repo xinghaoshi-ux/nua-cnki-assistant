@@ -1,0 +1,19 @@
+{
+  "name": "cnki-research",
+  "version": "0.2.0",
+  "description": "Cross-platform CNKI search, reading, download, and research synthesis for Claude Code.",
+  "author": {
+    "name": "Estel Xinghao Shi",
+    "url": "https://github.com/xinghaoshi-ux"
+  },
+  "homepage": "https://github.com/xinghaoshi-ux/nua-cnki-assistant#readme",
+  "repository": "https://github.com/xinghaoshi-ux/nua-cnki-assistant",
+  "license": "MIT",
+  "keywords": [
+    "CNKI",
+    "知网",
+    "academic-research",
+    "literature-review",
+    "Playwright"
+  ]
+}

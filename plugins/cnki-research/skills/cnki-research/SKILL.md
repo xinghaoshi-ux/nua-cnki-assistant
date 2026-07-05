@@ -1,6 +1,6 @@
 ---
 name: cnki-research
-description: Search Chinese and international scholarly literature, operate CNKI through the Nanjing University of the Arts proxy with the available Codex browser or Playwright MCP session, retrieve OpenAlex or Crossref metadata, inspect DOI and open-access availability, extract CNKI results, abstracts, and accessible CNKI AI full text, produce structured full-text paper summaries, download papers, and generate APA, BibTeX, or GB/T 7714 citations. Use for requests such as CNKI, 知网, 使用知网搜索, 用知网查, 在知网搜, 帮我上知网, 查一下知网的文章, 查知网论文, 搜知网文献, 找知网论文, 知网检索, 高级检索, 专业检索, 读知网全文, 知网全文阅读, 下载知网论文, or equivalent requests to find, inspect, read, summarize, cite, export, or download papers through CNKI.
+description: Search Chinese and international scholarly literature through CNKI in Codex or Claude Code on macOS, Windows, or Linux; control the plugin-managed Chrome session with Playwright, rank results, read accessible full text through each paper's detail page and CNKI AI阅读, download PDF or explicitly requested CAJ files, retrieve metadata, and generate citations. Use for requests such as NUA知网小助手, NUA论文小助手, cnki-research, CNKI, 知网, 使用知网搜索, 用知网查, 在知网搜, 帮我上知网, 查一下知网的文章, 查知网论文, 搜知网文献, 找知网论文, 知网检索, 高级检索, 专业检索, 查文献, 读知网全文, 知网全文阅读, 下载知网论文, PDF下载, CAJ下载, or equivalent requests to find, inspect, read, summarize, cite, export, or download papers through CNKI.
 ---
 
 # CNKI Research
@@ -8,13 +8,13 @@ description: Search Chinese and international scholarly literature, operate CNKI
 Use two distinct retrieval paths and label their results accurately:
 
 - Use `scripts/scholar_metadata.py` for fast OpenAlex or Crossref metadata retrieval. Never describe these results as a direct CNKI search.
-- Use the plugin-provided `cnki-playwright` MCP server for searches that must run directly on CNKI, including CNKI professional expressions, CNKI filters, result pages, article abstracts, downloads, and accessible full text. On macOS, it connects to the plugin-managed visible Chrome instance through a local remote-debugging endpoint; other platforms fall back to Playwright MCP extension mode.
+- Use the plugin-provided `cnki-playwright` MCP server for every direct CNKI task whenever its browser tools are available. On Codex, use the persistent `node_repl js` Playwright path only as a fallback when the plugin MCP tools are unavailable.
 
 Do not bypass CAPTCHA, authentication, institutional access, paywalls, rate limits, or access controls.
 
 ## Select the retrieval path
 
-1. If the user explicitly says CNKI, 知网, professional search, or supplies a CNKI URL, use direct CNKI browser search.
+1. If the user explicitly says `cnki-research`, CNKI, 知网, 进知网, 知网检索, professional search, or supplies a CNKI URL, launch or reuse the Playwright-controlled Google Chrome session and search CNKI directly. Treat close variants with the same intent as direct-CNKI requests; do not start with OpenAlex or Crossref.
 2. If the user asks generally for papers, DOI metadata, citations, citation counts, or open-access availability, start with OpenAlex.
 3. Use Crossref to verify DOI metadata or fill missing publication fields.
 4. For systematic or high-recall work, combine sources, record the source of every result, and deduplicate by normalized DOI, then normalized title.
@@ -32,6 +32,8 @@ python3 scripts/scholar_metadata.py doi "10.1000/example"
 python3 scripts/scholar_metadata.py cite "10.1000/example" --style gbt7714
 ```
 
+On native Windows, use `py -3` instead of `python3` when only the Python launcher is available.
+
 The script URL-encodes inputs, validates limits, years, DOI syntax, and emits UTF-8 JSON or citation text. Use `--source crossref` when Crossref is specifically required.
 
 For field meanings and search constraints, read [references/metadata-sources.md](references/metadata-sources.md).
@@ -39,69 +41,92 @@ For citation rules, read [references/citation-formats.md](references/citation-fo
 
 ## Search CNKI directly
 
-Choose the browser surface before interacting:
+Use Playwright with the plugin-managed Google Chrome profile. Do not switch to a different browser surface merely to bypass authentication, verification, or access controls.
 
-1. For every direct CNKI browser task, use the plugin-provided `cnki-playwright` MCP server to control Chrome by default whenever its tools are callable. Its tools may appear under a namespaced MCP tool group; discover and use the browser tab, snapshot, navigation, click, fill, evaluation, and screenshot tools from that server. Apply this default when the user invokes `cnki-research` without naming a browser surface; do not ask the user to choose.
-2. Use the `browser:control-in-app-browser` skill only when Playwright MCP is unavailable or the user explicitly requests the in-app Browser. Read that skill before using it.
-3. If the user explicitly requests another available browser surface, follow that request.
-4. Do not switch browser surfaces merely to bypass authentication or verification.
+### Establish the Chrome session
 
-Do not assume OpenClaw actions such as `action: navigate`, `kind: fill`, or persistent `ref=e123` identifiers exist in Codex.
-
-### Establish a Playwright MCP session
-
-1. List tabs first. Reuse a live CNKI tab when one exists.
-2. If the previous browser or page was closed, create a new tab at the proxy entry instead of calling page methods on the dead context.
-3. The plugin launcher starts a dedicated, visible Chrome instance with macOS background activation and connects Playwright over its remote-debugging endpoint. Do not replace this with ordinary foreground launch or extension mode.
-4. Allow multiple tabs. Keep the results tab open, select new detail or reader tabs through Playwright, and close worker tabs after each paper.
-5. Never call `bringToFront`, activate Chrome through the operating system, or otherwise raise its window. The user may switch to Chrome manually for institutional login or a visible verification challenge.
-
-1. Start from the Nanjing University of the Arts proxy entry:
+1. Discover the plugin-provided `cnki-playwright` MCP browser tools. Their names are host-dependent; use the available tab, snapshot, navigation, click, fill, evaluation, screenshot, and download tools rather than assuming one fixed namespace.
+2. List current tabs first and reuse a live CNKI tab. If the previous context is closed, create a new tab instead of calling methods on the dead page.
+3. The MCP launcher reuses local endpoint `http://127.0.0.1:9337` or starts a dedicated Chrome profile. On macOS Chrome starts in the background without activation. On Windows Chrome starts minimized so it does not take focus; the user can restore it from the taskbar for login. Linux uses the same minimized best-effort path.
+4. If MCP browser tools are unavailable in Codex but `node_repl js` is available, import `playwright`, connect to the same endpoint with `chromium.connectOverCDP`, and follow the same tab workflow. Claude Code should use the plugin MCP tools.
+5. Start from the Nanjing University of the Arts proxy entry:
    `https://v.nua.edu.cn/https/77726476706e69737468656265737421e7e056d2243e635930068cb8/`
-2. Wait for the CNKI homepage and confirm the page shows the institutional identity `南京艺术学院`. If the proxy requires login, tell the user once to complete it manually, then keep the turn active and monitor the current tab. Continue automatically as soon as the CNKI homepage or institutional identity appears.
-3. Enter advanced search through the live `高级检索` link. Prefer this in-site navigation over constructing or reusing a deep proxy URL because proxy host encodings and application context vary across CNKI services.
-4. Inspect the current page before every interaction. With Playwright MCP, use a fresh accessibility snapshot for locator ground truth and take a viewport screenshot when visual state matters.
-5. Locate controls using current accessible roles, labels, visible text, or inspected DOM. Never reuse element identifiers copied from old sessions.
-6. Enter a professional expression or configure the visible advanced-search rows.
-7. Apply requested date, source, document-type, discipline, or sorting filters.
-8. Submit once and wait for a concrete results-page signal to settle. Prefer a result count, result-list container, URL change, or enabled pagination control over a fixed sleep.
-9. Extract only the requested number of pages. Keep a modest pace and avoid repeated retries.
-10. Open article pages only when abstracts or additional metadata are requested.
+6. If institutional login is required, tell the user once to complete it manually in Chrome, then keep the task active and poll the current page every 5–10 seconds for up to 4 minutes. Continue automatically as soon as the CNKI page displays `南京艺术学院`; do not require the user to reply that login is complete. If the timeout expires, leave Chrome open and ask the user to confirm after completing login.
+7. Never automate credentials, CAPTCHA solving, or browser permission approval.
+8. Allow multiple tabs and popups when CNKI normally uses them. Keep the results tab open, select new detail or reader tabs through Playwright, and close them when finished.
+9. Never call `bringToFront`, activate Chrome through the operating system, or otherwise raise its window. The user may switch to Chrome manually when login or verification is required.
 
-Use ordinary CNKI at `https://kns.cnki.net/kns8s/AdvSearch?type=expert` only when the user explicitly requests it or when the Nanjing University of the Arts proxy is unavailable and the user accepts the fallback.
+1. Enter the CNKI advanced-search page through the live `高级检索` link on the proxied CNKI homepage.
+2. Verify that the visible page is the CNKI advanced-search interface before interacting.
+3. Inspect fresh page state before every interaction. Prefer Playwright roles, labels, visible text, or validated DOM attributes; use a screenshot when visual state matters.
+4. Use advanced-search rows by default. Switch to `专业检索` only when the user supplies a professional expression or explicitly requests that mode.
+5. Parse the topic into concept groups. Put synonyms or near-synonyms from one concept in the same theme box using ` + `; put distinct concepts in separate theme rows and use `AND` unless the user requests high recall, in which case use `OR`.
+6. Keep the expansion compact and show the effective query to the user. Ask for confirmation only when the expansion materially changes the topic.
+7. Apply requested document type, source category, date, discipline, and language filters. Do not silently force CSSCI, core journals, or a year range.
+8. Submit once and wait for a visible results signal. If a CAPTCHA actually blocks the form or results, stop for manual completion.
+9. Sort according to the user's goal: relevance by default; cited count descending for influential/classic papers; date descending for recent work.
+10. Set 50 results per page when available. Use summary/detail view when abstracts are requested.
+11. Extract only the requested number of records. Open detail pages only when the list view lacks an abstract or required metadata.
+
+Read [references/cnki-browser-workflow.md](references/cnki-browser-workflow.md) before operating CNKI. It defines the Playwright Chrome interaction, ranking, extraction, and full-text workflow.
 
 Use the field codes and expression rules in [references/cnki-query-guide.md](references/cnki-query-guide.md). Treat the live CNKI interface as authoritative if it differs.
-
-### Monitor user-controlled access steps
-
-For browser-connection approval, institutional login, or a visible verification challenge:
-
-1. Explain the required manual action once in commentary.
-2. Do not send a final response merely to wait, and do not require messages such as “已完成” or “继续”.
-3. Keep the task active and re-inspect fresh tab, URL, viewport, and DOM state at a modest pace. Prefer a browser-native wait tool; otherwise use repeated tab and snapshot checks without aggressive requests or blocking sleeps longer than 60 seconds.
-4. Treat user messages received during monitoring as additional input, but do not depend on them to resume.
-5. Continue the original workflow immediately when the expected page state becomes usable.
-6. Never automate credentials, CAPTCHA solving, `Allow & select`, or any other user-controlled security action.
-7. Stop only when the browser connection is genuinely unavailable, access is denied, repeated verification prevents progress, or the product ends the active turn.
 
 ## Handle verification and authentication
 
 Treat CAPTCHA state as current page state, not persistent session state.
 
-1. Take both a fresh viewport screenshot and a fresh DOM/accessibility snapshot before reporting a CAPTCHA.
-2. Report a slider, image challenge, or CAPTCHA only when its interactive control intersects the current viewport and blocks the required search action.
+1. Take a fresh DOM snapshot or screenshot before reporting a CAPTCHA.
+2. Report a slider, image challenge, or CAPTCHA only when its interactive control is currently visible and blocks the required search action.
 3. Do not infer an active challenge from a `captchaId` URL parameter, hidden/stale CAPTCHA markup, a previous challenge, or an old snapshot.
-4. Do not rely on `isVisible()` alone. Confirm that the challenge has a nonzero bounding box whose rectangle overlaps the viewport. Treat large negative coordinates, offscreen transforms, zero-area boxes, and clipped overlays as inactive. For example, an element at `y=-999985` is stale/offscreen even if computed CSS says `visibility: visible`.
-5. If the screenshot and raw DOM text disagree, use viewport geometry and the screenshot to determine whether the challenge is actionable. Continue when the normal search interface is usable.
-6. When reporting a real challenge, include or link the fresh screenshot so the user can verify the same state.
-7. If the user says verification is complete, immediately inspect fresh page state. When the search form or results are usable and no actionable challenge is visible, continue without mentioning verification again.
-8. If a login prompt or institutional-access step is currently visible and blocking access, tell the user exactly what must be completed manually, then monitor it under `Monitor user-controlled access steps`.
+4. If the user says verification is complete, immediately inspect fresh page state. When the search form or results are usable and no challenge control is visible, continue without mentioning verification again.
+5. If a login prompt or institutional-access step is visible and blocking access, tell the user exactly what must be completed manually, keep the task active, and resume automatically when fresh page state becomes usable.
 
 Never solve or circumvent anti-bot verification programmatically. Do not download subscription content unless the user has legitimate access and explicitly requests the download.
 
+## Read and summarize accessible full text
+
+When the user asks to read papers in full, repeat this exact UI path for every paper:
+
+1. Click the paper title in the results tab and wait for its proxied `文献知网节` detail tab.
+2. On that detail page, click the visible `CNKI AI阅读` button. Do not navigate directly to an AI URL copied from the results page or DOM.
+3. Select the newly opened AI-reading tab through Playwright without raising Chrome, and verify that its title matches the paper.
+4. Treat the AI reader as asynchronous and lazy-loaded. Poll the current title and reader state every 2 seconds for up to 30 seconds. Do not classify the article from the first screen, a short body-text snapshot, or a transient `暂无本文阅读权益` message.
+5. Determine the expected document extent from a page counter, article outline, or page shells. For paginated readers, locate the document scroll container and visit every page shell in order. Wait for each page to load text, canvas, or image content; revisit any empty page once. Verify the last page and confirm that the loaded content covers the article body through its conclusion and references. Do not use total character count or the sidebar prompt containing `参考文献` as proof of full-text access.
+6. Classify the reader state explicitly:
+   - `verified accessible`: the title matches, all expected pages or complete sections load, and the terminal article content is present.
+   - `still loading`: page shells exist but one or more pages remain empty or the document is still expanding.
+   - `verified unavailable`: no article pages load and the current reader continues to show `暂无本文阅读权益` across two checks 3–5 seconds apart.
+   - `reader error/incomplete`: the reader fails to settle, shows only metadata or generated notes, or cannot expose the expected document extent.
+7. Before reporting `verified unavailable`, close the AI-reading tab, return to the same detail tab, click the visible `CNKI AI阅读` button again, and repeat steps 3–6 once. Report no access only when both independent attempts reach `verified unavailable` for the same title. Never infer no access from a prior paper's reader state.
+8. Read the complete body, including introduction, methods or design process, results or analysis, conclusion, and references. PDF text may be extracted from the document stream already loaded by the AI reader, but only after completing the UI and page-validation sequence above. Do not save or redistribute the source file unless the user explicitly requests a download.
+9. If both attempts expose only an abstract, recommendations, generated notes, or a trial fragment, mark the paper as incomplete rather than unavailable and replace it with another candidate. Never label an abstract-only synthesis as a full-text summary.
+10. After completing the extraction, close the AI-reading and detail tabs without foregrounding Chrome, then continue from the preserved results tab.
+11. If the paper is inaccessible or incomplete, close its reader and detail tabs before replacing it with another candidate.
+
+For each full-text summary, distinguish the authors' claims from critical assessment and cover:
+
+- bibliographic identity and research object
+- research question and theoretical framework
+- method, sample, materials, or design process actually reported
+- major findings and conclusions
+- contribution, limitations, and actionable implications supported by the paper
+- topic-specific mechanisms, outcomes, and constraints when the paper reports them
+
+## Download papers
+
+When the user asks to download papers, repeat this exact UI path for every paper:
+
+1. Click the paper title in the results tab and wait for its proxied `文献知网节` detail tab.
+2. Click the visible `PDF下载` button on that detail page. PDF is the default format.
+3. Click `CAJ下载` only when the user explicitly requests CAJ. Do not choose CAJ merely because it is available.
+4. Do not use a download link captured from the results list, construct a download URL, or navigate directly to a download endpoint.
+5. Use Playwright's download event, wait for completion, and verify that the saved file exists, is non-empty, and has the requested file type.
+6. After the download is verified, close the detail tab without foregrounding Chrome, return to the preserved results tab, and repeat.
+
 ## Extract and report results
 
-Prefer visible DOM state and semantic selectors. Page structure changes frequently; do not depend on a generic first `table`, fixed column indexes, or broad selectors such as `[class*="title"]` without validating the matched content. Before bulk extraction, identify the exact results container and validate its headers or repeated row structure. Extract one bounded page at a time with one DOM projection when possible.
+Prefer visible DOM state and semantic selectors. Page structure changes frequently; do not depend on a generic first `table`, fixed column indexes, or broad selectors such as `[class*="title"]` without validating the matched content.
 
 Capture, when available:
 
@@ -122,33 +147,9 @@ For every batch:
 2. Preserve missing values as empty/null; do not infer bibliographic facts.
 3. Deduplicate before export.
 4. Distinguish metadata links, landing pages, and verified direct PDF links.
-5. Prefer a compact table in chat; export JSON or CSV only when requested.
-
-## Read and summarize accessible full text
-
-When the user asks to read a paper in full and summarize it:
-
-1. Click the paper title in the results tab and wait for its detail tab. Click the visible `CNKI AI阅读` control on that detail page; do not jump directly to a captured AI-reader URL.
-2. Verify that the reader title matches the target paper. Treat the reader as asynchronous and lazy-loaded: poll the title and state every 2 seconds for up to 30 seconds. Do not classify access from the first screen, a short body-text snapshot, or a transient `暂无本文阅读权益` message.
-3. Determine the expected document extent from a page counter, complete outline, or page shells. For paginated readers, locate the document scroll container and visit every page shell in order. Wait for each page to load text, canvas, or image content; revisit any empty page once.
-4. Verify the last page or final section and confirm coverage through the conclusion and references. Do not use total character count, recommendation text, generated notes, or a sidebar prompt containing `参考文献` as evidence that the article loaded.
-5. Classify the state as `verified accessible`, `still loading`, `verified unavailable`, or `reader error/incomplete`. Use `verified unavailable` only when no article pages load and the current no-rights message persists across two checks 3–5 seconds apart.
-6. Before reporting no rights, close the reader tab, return to the same detail tab, click `CNKI AI阅读` again, and repeat steps 2–5 once. Require two independent `verified unavailable` attempts for the same title. Never inherit reader state from a previously opened paper.
-7. Confirm that actual body sections are present, not only the title, abstract, recommendations, or generated notes. Treat unresolved or partial readers as `reader error/incomplete`, not as permissions failures.
-8. Read the complete article body, including introduction, section headings, conclusion, and references. Use an accessible PDF as a cross-check when available.
-9. Separate the authors' claims from critical assessment. Do not infer methods, samples, data, or conclusions that the article does not report.
-10. Summarize in original language; do not reproduce the full article or extended verbatim passages.
-11. Use this structure by default unless the user requests another format:
-   - `全文总结`: bibliographic identity, target population or object, problem, and central proposition.
-   - `研究背景`: why the problem matters and the gap identified by the authors.
-   - Topic-specific analytical sections following the paper's own argument, with numbered subsections when useful.
-   - `核心结论`: the paper's final claims, compressed into a small set of principles or relationships.
-   - `研究贡献`: conceptual, methodological, empirical, or practical value actually supported by the paper.
-   - `研究局限`: evidence quality, method, sampling, measurement, validation, scope, and causal limitations.
-   - `后续研究方向`: concrete ways to test, extend, or operationalize the paper.
-12. For design or interaction papers, explicitly map user characteristics, media affordances, interaction mechanisms, outcomes, and constraints when the paper supports them.
-13. Do not label the output “博士” or repeatedly mention academic level. Achieve rigor through structure, evidence distinctions, and critical evaluation.
-14. After finishing the paper, close its reader and detail tabs without raising Chrome, then continue from the preserved results tab.
+5. For “most relevant” requests, rank by direct topic overlap first, then title/keyword overlap, abstract overlap, and finally citations as a tie-breaker. Do not equate high citation count with relevance.
+6. Label summaries as `原始摘要` when faithfully translated or condensed from a visible abstract, and `内容概述` when synthesized from accessible full text. Never manufacture an abstract from a title.
+7. Prefer a compact table in chat; export JSON, CSV, RIS, or CNKI Word records only when requested.
 
 ## Generate citations
 
@@ -164,9 +165,10 @@ State which fields are missing rather than silently inventing them.
 
 - Empty OpenAlex results: retry with translated terms, synonyms, or fewer filters; then offer direct CNKI search.
 - Missing DOI: search by exact title and author; do not fabricate a DOI.
-- CNKI selector mismatch: inspect the live page and rebuild selectors from current semantics.
-- Closed Playwright context: create a new Playwright MCP tab at the proxy entry, complete any browser-connection approval if prompted, then resume in the new session.
-- Stale CAPTCHA signal: discard the old signal, capture a fresh screenshot, check viewport intersection, and continue when search controls are usable.
-- Apparent CNKI AI no-rights state: run the delayed, page-by-page, two-attempt validation above. Report a permissions failure only after both attempts are `verified unavailable`; otherwise report `reader error/incomplete`.
+- Chrome launch failure: verify Node.js 18+, `npx`, and Google Chrome. On Windows also verify the standard Chrome install locations or set `CNKI_CHROME_EXECUTABLE`.
+- Closed Playwright context: create a new MCP tab or reconnect the Codex Playwright fallback to the same local endpoint, then resume from the proxy entry.
+- CNKI selector mismatch: inspect the live page and rebuild Playwright locators from current roles, text, and attributes.
+- Stale CAPTCHA signal: discard the old signal, inspect the current visible page, and continue when search controls are usable.
+- CNKI AI阅读 appears to have no full-text rights: apply the two-attempt, delayed, page-by-page validation workflow above. Exclude the record only after both attempts are `verified unavailable`; otherwise label it `reader error/incomplete` and do not claim a permissions failure.
 - Access denied or repeated verification: stop and report the limitation.
 - No abstract: record it as unavailable and avoid substituting unrelated page text.
